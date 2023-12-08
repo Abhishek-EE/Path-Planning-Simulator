@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <Eigen/Dense>
+#include <iostream>
 #include "OccupancyGrid.h" 
 #include "PathPlannerInterface.h"
 
@@ -23,7 +24,7 @@
  *       The function uses OpenCV, so ensure OpenCV is correctly linked in your project.
  */
 void visualizeGrid(const OccupancyGrid& grid, const Eigen::Vector3f& start, const Eigen::Vector3f& end) {
-    int cellSize = 10; // Size of each grid cell in the image (pixels)
+    int cellSize = 1; // Size of each grid cell in the image (pixels)
     cv::Mat image(grid.height * cellSize, grid.width * cellSize, CV_8UC3, cv::Scalar(255, 255, 255));
 
     // Draw the grid
@@ -40,15 +41,18 @@ void visualizeGrid(const OccupancyGrid& grid, const Eigen::Vector3f& start, cons
         }
     }
 
-    // Draw start and end points
+    // Calculate the radius for start and end points
+    int pointRadius = 5;
+
+    // Draw start and end points with increased radius
     cv::circle(image, 
                cv::Point(static_cast<int>(start.x() / grid.resolution_m * cellSize),
                          static_cast<int>(start.y() / grid.resolution_m * cellSize)), 
-               cellSize / 2, cv::Scalar(0, 255, 0), -1); // Green for start
+               pointRadius, cv::Scalar(0, 255, 0), -1); // Green for start
     cv::circle(image, 
                cv::Point(static_cast<int>(end.x() / grid.resolution_m * cellSize),
                          static_cast<int>(end.y() / grid.resolution_m * cellSize)), 
-               cellSize / 2, cv::Scalar(255, 0, 0), -1); // Blue for end
+               pointRadius, cv::Scalar(255, 0, 0), -1); // Blue for end
 
     //Save the image
     cv::imwrite("occupancy_grid.png", image);
@@ -79,7 +83,7 @@ void visualizeGrid(const OccupancyGrid& grid, const Eigen::Vector3f& start, cons
  *       Ensure that the grid and trajectory data are correctly populated before calling this function.
  */
 void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& trajectory) {
-    int cellSize = 10; // Size of each grid cell in the image (pixels)
+    int cellSize = 1; // Size of each grid cell in the image (pixels)
     cv::Mat image(grid.height * cellSize, grid.width * cellSize, CV_8UC3, cv::Scalar(255, 255, 255));
 
     // Draw the grid
@@ -96,12 +100,13 @@ void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& tra
         }
     }
 
+
     // Draw the trajectory
     for (size_t i = 1; i < trajectory.size(); ++i) {
         cv::Point p1(static_cast<int>(trajectory[i - 1].x() / grid.resolution_m * cellSize),
-                     static_cast<int>(trajectory[i - 1].y() / grid.resolution_m * cellSize));
+                    static_cast<int>(trajectory[i - 1].y() / grid.resolution_m * cellSize));
         cv::Point p2(static_cast<int>(trajectory[i].x() / grid.resolution_m * cellSize),
-                     static_cast<int>(trajectory[i].y() / grid.resolution_m * cellSize));
+                    static_cast<int>(trajectory[i].y() / grid.resolution_m * cellSize));
         cv::line(image, p1, p2, cv::Scalar(0, 255, 0), 2); // Green line for trajectory
     }
 
@@ -110,4 +115,52 @@ void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& tra
     // Display the image
     cv::imshow("Trajectory", image);
     cv::waitKey(0); // Wait for a key press
+}
+
+
+/**
+ * @brief Generates an occupancy grid from a grayscale image.
+ *
+ * This function reads a grayscale image from the given file path and generates
+ * an occupancy grid based on the image's pixel intensities. The function assumes
+ * that darker pixels represent obstacles and lighter pixels represent free space.
+ * Each pixel's intensity is compared against a threshold to determine if it
+ * should be considered an obstacle.
+ *
+ * The generated occupancy grid will have the same dimensions as the provided
+ * image, resized if necessary, and each cell in the grid will correspond to a
+ * pixel in the image.
+ *
+ * @param grid A reference to an OccupancyGrid object where the occupancy data
+ *             will be stored. The grid's width, height, and resolution should be
+ *             set appropriately before calling this function.
+ * @param imagePath The file path of the grayscale image to be processed.
+ *
+ * @throw std::runtime_error If the image cannot be read or is empty.
+ *
+ * @note The function uses a threshold value (typically 128) to distinguish
+ *       obstacles from free space. This threshold can be adjusted as needed.
+ * @note The OccupancyGrid's `setAsObstacle` method is used to mark cells as
+ *       occupied based on the image data.
+ */
+void generateOccupancyGridFromImage(OccupancyGrid &grid, const std::string &imagePath) {
+    cv::Mat image = cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
+    if (image.empty()) {
+        throw std::runtime_error("Could not read the image: " + imagePath);
+    }
+
+    // Resize image to match grid dimensions if necessary
+    if (image.cols != grid.width || image.rows != grid.height) {
+        cv::resize(image, image, cv::Size(grid.width, grid.height));
+    }
+
+    for (int y = 0; y < image.rows; ++y) {
+        for (int x = 0; x < image.cols; ++x) {
+            if (image.at<uchar>(y, x) < 255) {  // Assuming darker pixels are obstacles
+                float x_coordinate = x*grid.resolution_m;
+                float y_coordinate = y*grid.resolution_m;
+                grid.setAsObstacle(x_coordinate, y_coordinate );
+            }
+        }
+    }
 }

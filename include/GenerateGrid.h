@@ -4,6 +4,7 @@
 #include<Eigen/Dense>
 #include<memory>
 #include <algorithm>
+#include <PathPlannerInterface.h>
 
 /**
 * @class Generate Grid
@@ -58,4 +59,5 @@ class GenerateGridImplementation: public GenerateGridInterface{
         const OccupancyGrid& getGrid() const{
             return grid;
         }
+        Trajectory getValidTrajectory()const;
 };

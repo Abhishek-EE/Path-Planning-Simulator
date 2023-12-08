@@ -34,13 +34,14 @@ void GenerateGridImplementation::generateValidPath(const Eigen::Vector3f &start,
 
     while (iter<100000) {
         std::vector<Eigen::Vector3f> points;
+        ++iter;
         for (int i = 0; i < 8; ++i) {
             float angle = 2 * M_PI * i / 8;
             Eigen::Vector3f point = curr + Eigen::Vector3f(robotDia * cos(angle), robotDia * sin(angle), 0);
 
             // Convert the point to grid coordinates and check if it's within the grid boundaries
-            int xIndex = static_cast<int>(std::floor(point.x() / grid.resolution_m));
-            int yIndex = static_cast<int>(std::floor(point.y() / grid.resolution_m));
+            int xIndex = static_cast<int>((point.x() / grid.resolution_m));
+            int yIndex = static_cast<int>((point.y() / grid.resolution_m));
 
             if (xIndex >= 0 && xIndex < grid.width && yIndex >= 0 && yIndex < grid.height) {
                 points.push_back(point);
@@ -55,7 +56,7 @@ void GenerateGridImplementation::generateValidPath(const Eigen::Vector3f &start,
         for (const auto& point : points) {
             double distance = (point - end).head<2>().norm();
             if (distance != 0) { // Avoid division by zero
-                weights.push_back(1.0 / distance);
+                weights.push_back(1.0 / pow(distance,4));
             } else {
                 weights.push_back(std::numeric_limits<double>::max()); // Max weight for zero distance
             }
@@ -116,8 +117,9 @@ void GenerateGridImplementation::addObstacles() {
     int totalCells = grid.width * grid.height;
     int obstacleCells = static_cast<int>(occupancyRatio * totalCells);
     int addedObstacles = 0;
-
-    while (addedObstacles < obstacleCells) {
+    int iter = 0;
+    while (addedObstacles < obstacleCells && iter<100000) {
+        ++iter;
         int x = disX(gen);
         int y = disY(gen);
         int index = grid.get1DIndex(x, y);
@@ -139,10 +141,34 @@ void GenerateGridImplementation::addObstacles() {
 
         // Add obstacle if it's not too close to the path
         if (!tooCloseToPath && index != -1 && !grid.data[index]) {
-            grid.setAsObstacle(x * grid.resolution_m, y * grid.resolution_m);
-            ++addedObstacles;
+
+            for (int dx = -robotDia/grid.resolution_m; dx <= robotDia/grid.resolution_m; ++dx) {
+                for (int dy = -robotDia/grid.resolution_m; dy <= robotDia/grid.resolution_m; ++dy) {
+                                grid.setAsObstacle((x+dx) * grid.resolution_m, (y+dy) * grid.resolution_m);
+                                ++addedObstacles;
+                }
+            }      
+
         }
+
     }
+    std::cout<<"something to check";
+}
+
+Trajectory GenerateGridImplementation::getValidTrajectory() const{
+    
+    Trajectory path;
+        for (int index : trajectory_index) {
+            // Convert 1D index to 2D grid coordinates
+            int xIndex = index % grid.width;
+            int yIndex = index / grid.width;
+
+            // Convert grid coordinates to world coordinates
+            Eigen::Vector3f worldPoint(xIndex * grid.resolution_m, yIndex * grid.resolution_m, 0.0f);
+            
+            path.push_back(worldPoint);
+        }
+        return path;
 }
 
 void GenerateGridImplementation::generateGrid(const Eigen::Vector3f &start, const Eigen::Vector3f &end, const bool isValid) {

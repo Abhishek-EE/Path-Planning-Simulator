@@ -31,8 +31,8 @@ struct OccupancyGrid {
    * @param yCoordinate is the y coordinate in m
    */
   void setAsObstacle(float xCoordinate, float yCoordinate) {
-    int xIndex = int(std::floor(xCoordinate)/resolution_m);
-    int yIndex = int(std::floor(yCoordinate)/resolution_m);
+    int xIndex = int((xCoordinate)/resolution_m);
+    int yIndex = int((yCoordinate)/resolution_m);
 
     int obsIndex = this->get1DIndex(xIndex, yIndex);
 
@@ -42,10 +42,10 @@ struct OccupancyGrid {
 
    void visualizeGrid(const Eigen::Vector3f& start, const Eigen::Vector3f& end) const {
         // Convert start and end positions to grid indices
-        int startX = static_cast<int>(std::floor(start.x() / resolution_m));
-        int startY = static_cast<int>(std::floor(start.y() / resolution_m));
-        int endX = static_cast<int>(std::floor(end.x() / resolution_m));
-        int endY = static_cast<int>(std::floor(end.y() / resolution_m));
+        int startX = static_cast<int>((start.x() / resolution_m));
+        int startY = static_cast<int>((start.y() / resolution_m));
+        int endX = static_cast<int>((end.x() / resolution_m));
+        int endY = static_cast<int>((end.y() / resolution_m));
 
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
