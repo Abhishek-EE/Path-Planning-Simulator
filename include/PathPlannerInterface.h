@@ -13,3 +13,13 @@ public:
                                           const Eigen::Vector3f &end) = 0;
 
 };
+
+// class PathPlannerImplementation: public PathPlannerInterface{
+
+// public:
+//   Trajectory getCollisionFreePath(const OccupancyGrid &grid,
+//                                   const Eigen::Vector3f &start,
+//                                   const Eigen::Vector3f &end) override{
+
+//                                   }
+// };
