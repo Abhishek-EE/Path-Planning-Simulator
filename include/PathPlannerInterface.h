@@ -5,6 +5,7 @@
 #include <queue>
 #include <unordered_map>
 #include <memory>
+#include <opencv2/opencv.hpp>
 
 typedef std::vector<Eigen::Vector3f> Trajectory;
 
@@ -42,5 +43,14 @@ private:
     bool isTraversable(const Eigen::Vector3f &point, const OccupancyGrid &grid) const;
     float heuristic(const Eigen::Vector3f &point1, const Eigen::Vector3f &point2) const;
     Eigen::Vector3f transformRobotToGridFrame(const Eigen::Vector3f& robotFramePoint, const Eigen::Vector3f& robotPosition) const;
+    int getPointIndex(const Eigen::Vector3f& position, const OccupancyGrid& grid)const{
+        
+        int xIndex = static_cast<int>((position.x() / grid.resolution_m));
+        int yIndex = static_cast<int>((position.y() / grid.resolution_m));
+        int index = grid.get1DIndex(xIndex,yIndex);
+        return index;
+    }
     // Additional helper functions as needed
 };
+
+

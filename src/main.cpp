@@ -27,7 +27,7 @@ int main() {
   generateOccupancyGridFromImage(grid,"/home/abhishek/dev/Planning_Assingment/grid-example.png");
   visualizeGrid(grid,start,end);
   path = planner.getCollisionFreePath(grid,start,end);
-  visualizeGridAndTrajectory(grid,path);
+  // visualizeGridAndTrajectory(grid,path);
 #endif
   return 0;
 }
