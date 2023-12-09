@@ -3,7 +3,6 @@
 #include <cmath>
 #include <unordered_set>
 #include <opencv2/opencv.hpp>
-
 // Constructor
 PathPlannerImplementation::PathPlannerImplementation(float robotDiameter)
     : robotDia(robotDiameter) {}
@@ -45,37 +44,50 @@ Trajectory PathPlannerImplementation::getCollisionFreePath(const OccupancyGrid &
     startNode->gCost = 0;
     startNode->hCost = heuristic(start, end);
     openQueue.push(startNode);
+
     //Set to keep track of visited and in queue nodes
     std::unordered_set<int> closedSet;
     std::unordered_set<int> openSet;
 
+    int iter=0; //To keep track of maximum iterations
+
     while (!openQueue.empty()) {
+        
+        ++iter;
+        if (iter > 100000) {
+            std::cerr << "Warning: Maximum Iterations Reached, the goal seems unreachable" << std::endl;
+        }
+        
+        //Get the current node and add it to the closedSet (that is it is already visited)
         auto currentNode = openQueue.top();
         openQueue.pop();
-        // Add to closed set
-        // closedSet.insert(currentNode->position.head<2>());
         int index = getPointIndex(currentNode->position,grid);
-        if (index == -1) {
+        if (index < 0) {
             throw std::out_of_range("Index out of bounds: Something went horribly wrong");
         }
         closedSet.insert(index);
 
         // Goal check
         if (heuristic(currentNode->position, end) < robotDia) {
-            return reconstructPath(currentNode);
+            return smoothTrajectory(reconstructPath(currentNode),3);
         }
 
-        // Generate neighbors
+        // Generate neighbors (only neighbors which are traversable get added)
         auto neighbors = getNeighbors(currentNode, end, grid);
         for (const auto& neighbor : neighbors) {
             // Skip if the neighbor is already in the closed set
             int index = getPointIndex(neighbor->position,grid);
+            if (index < 0) {
+                throw std::out_of_range("Index out of bounds: Something went horribly wrong");
+            }
             if (closedSet.find(index) != closedSet.end()) {
                 continue;
             }
 
             // Calculate tentative gCost
             float tentativeGCost = currentNode->gCost + (neighbor->position.head<2>() - currentNode->position.head<2>()).norm();
+            
+            //If the neighbor already visited then only add it to queue if new score less than the old
             if(openSet.find(index) != openSet.end()){
             if (tentativeGCost < neighbor->gCost) {
                 neighbor->parent = currentNode;
@@ -126,13 +138,13 @@ std::vector<std::shared_ptr<PathPlannerImplementation::Node>> PathPlannerImpleme
 
 // Check if a point is traversable, considering the robot's diameter
 bool PathPlannerImplementation::isTraversable(const Eigen::Vector3f& robotLocation, const OccupancyGrid& grid) const {
-
-    for(float x=-robotDia/2; x<=robotDia/2;x+=grid.resolution_m){
-        for(float y=-robotDia/2;y<=robotDia/2;y+=grid.resolution_m){
+    float buffer = 0.1*robotDia; //Adding extra buffer to make sure that the robot could safely traverse to this point
+    for(float x=-((robotDia/2)); x<=(robotDia/2)+2*buffer;x+=grid.resolution_m){
+        for(float y=-((robotDia/2)+buffer);y<=(robotDia/2)+buffer;y+=grid.resolution_m){
             Eigen::Vector3f robotFramePoint(x,y,0);
             Eigen::Vector3f gridFramePoint = transformRobotToGridFrame(robotFramePoint,robotLocation);
             int index = getPointIndex(gridFramePoint,grid);
-            if(index == -1 || grid.data[index]){//Index out of range not traversable or index has an obstacle not traversable
+            if(index < 0 || grid.data[index]){//Index out of range not traversable or index has an obstacle not traversable
                 return false;
             }
         }
@@ -164,3 +176,31 @@ Eigen::Vector3f PathPlannerImplementation::transformRobotToGridFrame(const Eigen
     return Eigen::Vector3f(translatedPoint.x(), translatedPoint.y(), robotFramePoint.z());
 }
 
+//Function to smoothen the trajectory
+Trajectory PathPlannerImplementation::smoothTrajectory(const Trajectory& inputTrajectory, int windowSize) {
+    Trajectory smoothedTrajectory = inputTrajectory;
+
+    if (windowSize <= 1 || inputTrajectory.size() <= 2) {
+        return smoothedTrajectory; // No smoothing needed
+    }
+
+    for (size_t i = 1; i < inputTrajectory.size() - 1; ++i) {
+        Eigen::Vector3f sum = inputTrajectory[i]; // start with the current point
+
+        int count = 1; // start with the current point
+        for (int j = 1; j <= windowSize / 2; ++j) {
+            if (i - j > 0) {
+                sum += inputTrajectory[i - j];
+                ++count;
+            }
+            if (i + j < inputTrajectory.size()) {
+                sum += inputTrajectory[i + j];
+                ++count;
+            }
+        }
+
+        smoothedTrajectory[i] = sum / static_cast<float>(count); // calculate the average
+    }
+
+    return smoothedTrajectory;
+}

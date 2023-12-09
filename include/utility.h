@@ -43,7 +43,7 @@ void visualizeGrid(const OccupancyGrid& grid, const Eigen::Vector3f& start, cons
     }
 
     // Calculate the radius for start and end points
-    int pointRadius = 5;
+    int pointRadius = 10;
 
     // Draw start and end points with increased radius
     cv::circle(image, 
@@ -83,7 +83,7 @@ void visualizeGrid(const OccupancyGrid& grid, const Eigen::Vector3f& start, cons
  *       directory. This function requires OpenCV to be properly installed and linked in your project.
  *       Ensure that the grid and trajectory data are correctly populated before calling this function.
  */
-void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& trajectory) {
+void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& trajectory, const Eigen::Vector3f& start, const Eigen::Vector3f& end) {
     int cellSize = 1; // Size of each grid cell in the image (pixels)
     cv::Mat image(grid.height * cellSize, grid.width * cellSize, CV_8UC3, cv::Scalar(255, 255, 255));
 
@@ -100,7 +100,17 @@ void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& tra
             }
         }
     }
-
+    // Calculate the radius for start and end points
+    int pointRadius = 10;
+    // Draw start and end points with increased radius
+        cv::circle(image, 
+                cv::Point(static_cast<int>(start.x() / grid.resolution_m * cellSize),
+                            static_cast<int>(start.y() / grid.resolution_m * cellSize)), 
+                pointRadius, cv::Scalar(0, 255, 0), -1); // Green for start
+        cv::circle(image, 
+                cv::Point(static_cast<int>(end.x() / grid.resolution_m * cellSize),
+                            static_cast<int>(end.y() / grid.resolution_m * cellSize)), 
+                pointRadius, cv::Scalar(255, 0, 0), -1); // Blue for end
 
     // Draw the trajectory
     for (size_t i = 1; i < trajectory.size(); ++i) {

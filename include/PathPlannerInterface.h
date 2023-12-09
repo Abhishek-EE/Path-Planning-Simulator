@@ -9,6 +9,8 @@
 
 typedef std::vector<Eigen::Vector3f> Trajectory;
 
+
+
 class PathPlannerInterface {
 
 public:
@@ -43,6 +45,7 @@ private:
     bool isTraversable(const Eigen::Vector3f &point, const OccupancyGrid &grid) const;
     float heuristic(const Eigen::Vector3f &point1, const Eigen::Vector3f &point2) const;
     Eigen::Vector3f transformRobotToGridFrame(const Eigen::Vector3f& robotFramePoint, const Eigen::Vector3f& robotPosition) const;
+    Trajectory smoothTrajectory(const Trajectory& inputTrajectory, int windowSize);
     int getPointIndex(const Eigen::Vector3f& position, const OccupancyGrid& grid)const{
         
         int xIndex = static_cast<int>((position.x() / grid.resolution_m));
