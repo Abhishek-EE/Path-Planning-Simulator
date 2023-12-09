@@ -1,3 +1,0 @@
-/home/abhishek/dev/Planning_Assingment/build/CMakeFiles/rebuild_cache.dir
-/home/abhishek/dev/Planning_Assingment/build/CMakeFiles/edit_cache.dir
-/home/abhishek/dev/Planning_Assingment/build/CMakeFiles/CheckPath.dir

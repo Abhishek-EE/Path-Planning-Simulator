@@ -19,15 +19,15 @@ int main() {
   std::cout << "Hello World!\n";
 #else
   Trajectory path;
-  // GenerateGridImplementation gridGenerator(robotDia,occupancyratio);
+  GenerateGridImplementation gridGenerator(robotDia,occupancyratio);
   PathPlannerImplementation planner(robotDia);
-  // gridGenerator.generateGrid(start,end,isValid);
-  // const OccupancyGrid& grid = gridGenerator.getGrid();
-  OccupancyGrid grid;
-  generateOccupancyGridFromImage(grid,"/home/abhishek/dev/Planning_Assingment/grid-example.png");
+  gridGenerator.generateGrid(start,end,isValid);
+  const OccupancyGrid& grid = gridGenerator.getGrid();
+  // OccupancyGrid grid;
+  // generateOccupancyGridFromImage(grid,"/home/abhishek/dev/Planning_Assingment/grid-example.png");
   visualizeGrid(grid,start,end);
   path = planner.getCollisionFreePath(grid,start,end);
-  // visualizeGridAndTrajectory(grid,path);
+  visualizeGridAndTrajectory(grid,path);
 #endif
   return 0;
 }

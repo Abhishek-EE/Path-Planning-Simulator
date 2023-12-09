@@ -83,40 +83,40 @@ void visualizeGrid(const OccupancyGrid& grid, const Eigen::Vector3f& start, cons
  *       directory. This function requires OpenCV to be properly installed and linked in your project.
  *       Ensure that the grid and trajectory data are correctly populated before calling this function.
  */
-// void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& trajectory) {
-//     int cellSize = 1; // Size of each grid cell in the image (pixels)
-//     cv::Mat image(grid.height * cellSize, grid.width * cellSize, CV_8UC3, cv::Scalar(255, 255, 255));
+void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& trajectory) {
+    int cellSize = 1; // Size of each grid cell in the image (pixels)
+    cv::Mat image(grid.height * cellSize, grid.width * cellSize, CV_8UC3, cv::Scalar(255, 255, 255));
 
-//     // Draw the grid
-//     for (int y = 0; y < grid.height; ++y) {
-//         for (int x = 0; x < grid.width; ++x) {
-//             int index = grid.get1DIndex(x, y);
-//             if (grid.data[index]) {
-//                 cv::rectangle(image, 
-//                               cv::Point(x * cellSize, y * cellSize), 
-//                               cv::Point((x + 1) * cellSize, (y + 1) * cellSize), 
-//                               cv::Scalar(0, 0, 255), // Red for occupied cells
-//                               -1); // Filled
-//             }
-//         }
-//     }
+    // Draw the grid
+    for (int y = 0; y < grid.height; ++y) {
+        for (int x = 0; x < grid.width; ++x) {
+            int index = grid.get1DIndex(x, y);
+            if (grid.data[index]) {
+                cv::rectangle(image, 
+                              cv::Point(x * cellSize, y * cellSize), 
+                              cv::Point((x + 1) * cellSize, (y + 1) * cellSize), 
+                              cv::Scalar(0, 0, 255), // Red for occupied cells
+                              -1); // Filled
+            }
+        }
+    }
 
 
-//     // Draw the trajectory
-//     for (size_t i = 1; i < trajectory.size(); ++i) {
-//         cv::Point p1(static_cast<int>(trajectory[i - 1].x() / grid.resolution_m * cellSize),
-//                     static_cast<int>(trajectory[i - 1].y() / grid.resolution_m * cellSize));
-//         cv::Point p2(static_cast<int>(trajectory[i].x() / grid.resolution_m * cellSize),
-//                     static_cast<int>(trajectory[i].y() / grid.resolution_m * cellSize));
-//         cv::line(image, p1, p2, cv::Scalar(0, 255, 0), 2); // Green line for trajectory
-//     }
+    // Draw the trajectory
+    for (size_t i = 1; i < trajectory.size(); ++i) {
+        cv::Point p1(static_cast<int>(trajectory[i - 1].x() / grid.resolution_m * cellSize),
+                    static_cast<int>(trajectory[i - 1].y() / grid.resolution_m * cellSize));
+        cv::Point p2(static_cast<int>(trajectory[i].x() / grid.resolution_m * cellSize),
+                    static_cast<int>(trajectory[i].y() / grid.resolution_m * cellSize));
+        cv::line(image, p1, p2, cv::Scalar(0, 255, 0), 2); // Green line for trajectory
+    }
 
-//     // Save the image
-//     cv::imwrite("trajectory_grid.png", image);
-//     // Display the image
-//     cv::imshow("Trajectory", image);
-//     cv::waitKey(0); // Wait for a key press
-// }
+    // Save the image
+    cv::imwrite("trajectory_grid.png", image);
+    // Display the image
+    cv::imshow("Trajectory", image);
+    cv::waitKey(0); // Wait for a key press
+}
 
 
 /**

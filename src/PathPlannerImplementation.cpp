@@ -4,58 +4,32 @@
 #include <unordered_set>
 #include <opencv2/opencv.hpp>
 
-void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& trajectory) {
-    int cellSize = 1; // Size of each grid cell in the image (pixels)
-    cv::Mat image(grid.height * cellSize, grid.width * cellSize, CV_8UC3, cv::Scalar(255, 255, 255));
-
-    // Draw the grid
-    for (int y = 0; y < grid.height; ++y) {
-        for (int x = 0; x < grid.width; ++x) {
-            int index = grid.get1DIndex(x, y);
-            if (grid.data[index]) {
-                cv::rectangle(image, 
-                              cv::Point(x * cellSize, y * cellSize), 
-                              cv::Point((x + 1) * cellSize, (y + 1) * cellSize), 
-                              cv::Scalar(0, 0, 255), // Red for occupied cells
-                              -1); // Filled
-            }
-        }
-    }
-
-
-    // Draw the trajectory
-    for (size_t i = 1; i < trajectory.size(); ++i) {
-        cv::Point p1(static_cast<int>(trajectory[i - 1].x() / grid.resolution_m * cellSize),
-                    static_cast<int>(trajectory[i - 1].y() / grid.resolution_m * cellSize));
-        cv::Point p2(static_cast<int>(trajectory[i].x() / grid.resolution_m * cellSize),
-                    static_cast<int>(trajectory[i].y() / grid.resolution_m * cellSize));
-        cv::line(image, p1, p2, cv::Scalar(0, 255, 0), 2); // Green line for trajectory
-    }
-
-    // Save the image
-    cv::imwrite("trajectory_grid.png", image);
-    // Display the image
-    cv::imshow("Trajectory", image);
-    cv::waitKey(0); // Wait for a key press
-}
-struct Vector2fHash {
-    size_t operator()(const Eigen::Vector2f& key) const {
-        // Simple example of combining the hash of each component
-        // This is a basic approach and can be improved for better hash distribution
-        size_t xHash = std::hash<float>()(key.x());
-        size_t yHash = std::hash<float>()(key.y()) << 1; // Bit shift to mix the hashes
-        // size_t zHash = std::hash<float>()(key.z()) << 2; // Bit shift to mix the hashes
-
-        return xHash ^ yHash ; // XOR to combine the hashes
-    }
-};
-
-
 // Constructor
 PathPlannerImplementation::PathPlannerImplementation(float robotDiameter)
     : robotDia(robotDiameter) {}
 
 // A* Pathfinding Algorithm
+/**
+ * @brief Calculates a collision-free path from a start point to an end point within a given occupancy grid.
+ *
+ * This method implements the A* pathfinding algorithm to determine a collision-free path in a grid. It uses a heuristic
+ * function to estimate the cost from the current node to the end point and a priority queue to efficiently select the
+ * next node to process. The method handles out-of-bound errors and ensures that the path avoids occupied cells in the grid.
+ *
+ * @param grid The occupancy grid representing the environment, where obstacles and free spaces are marked.
+ * @param start An Eigen::Vector3f representing the starting position (x, y, theta) in the grid.
+ * @param end An Eigen::Vector3f representing the goal position (x, y, theta) in the grid.
+ * @return Trajectory A vector of Eigen::Vector3f points representing the calculated path from start to end. 
+ *         Returns an empty vector if no path is found.
+ *
+ * @throws std::out_of_range If an index is out of bounds, indicating an invalid position in the occupancy grid.
+ *
+ * @note The function uses a set of 'closed' nodes to keep track of visited positions and another set for nodes
+ *       that are in the priority queue ('open' nodes) to avoid reprocessing. The robot's diameter (robotDia) is
+ *       used to check proximity to the goal point.
+ * @note The heuristic function and getNeighbors method are assumed to be defined and used for estimating costs
+ *       and generating neighboring nodes, respectively.
+ */
 Trajectory PathPlannerImplementation::getCollisionFreePath(const OccupancyGrid &grid,
                                                            const Eigen::Vector3f &start,
                                                            const Eigen::Vector3f &end) {
@@ -71,20 +45,13 @@ Trajectory PathPlannerImplementation::getCollisionFreePath(const OccupancyGrid &
     startNode->gCost = 0;
     startNode->hCost = heuristic(start, end);
     openQueue.push(startNode);
-
-    // Set of visited nodes to avoid processing a node more than once
-    // std::unordered_set<Eigen::Vector2f, Vector2fHash> closedSet;
+    //Set to keep track of visited and in queue nodes
     std::unordered_set<int> closedSet;
     std::unordered_set<int> openSet;
-    int iter = 0;
+
     while (!openQueue.empty()) {
-        ++iter;
         auto currentNode = openQueue.top();
         openQueue.pop();
-        if(iter%10000 == 0){
-            visualizeGridAndTrajectory(grid,reconstructPath(currentNode));
-        }
-
         // Add to closed set
         // closedSet.insert(currentNode->position.head<2>());
         int index = getPointIndex(currentNode->position,grid);
@@ -95,7 +62,6 @@ Trajectory PathPlannerImplementation::getCollisionFreePath(const OccupancyGrid &
 
         // Goal check
         if (heuristic(currentNode->position, end) < robotDia) {
-            visualizeGridAndTrajectory(grid,reconstructPath(currentNode));
             return reconstructPath(currentNode);
         }
 
