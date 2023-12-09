@@ -18,20 +18,16 @@ int main() {
 #ifdef INTERFACE_NOT_IMPLEMENTED
   std::cout << "Hello World!\n";
 #else
-  Trajectory validPath;
-  GenerateGridImplementation gridGenerator(robotDia,occupancyratio);
-  gridGenerator.generateGrid(start,end,isValid);
-  const OccupancyGrid& grid = gridGenerator.getGrid();
+  Trajectory path;
+  // GenerateGridImplementation gridGenerator(robotDia,occupancyratio);
+  PathPlannerImplementation planner(robotDia);
+  // gridGenerator.generateGrid(start,end,isValid);
+  // const OccupancyGrid& grid = gridGenerator.getGrid();
+  OccupancyGrid grid;
+  generateOccupancyGridFromImage(grid,"/home/abhishek/dev/Planning_Assingment/grid-example.png");
   visualizeGrid(grid,start,end);
-  validPath = gridGenerator.getValidTrajectory();
-  visualizeGridAndTrajectory(grid,validPath);
-  OccupancyGrid grid2;
-  generateOccupancyGridFromImage(grid2,"/home/abhishek/dev/Planning_Assingment/grid-example.png");
-  visualizeGrid(grid2,start,end);
-
-
-
-
+  path = planner.getCollisionFreePath(grid,start,end);
+  visualizeGridAndTrajectory(grid,path);
 #endif
   return 0;
 }

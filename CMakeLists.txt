@@ -15,5 +15,5 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 
-add_executable(CheckPath src/main.cpp src/GenerateGrid.cpp)
+add_executable(CheckPath src/main.cpp src/GenerateGrid.cpp src/PathPlannerImplementation.cpp)
 target_link_libraries(CheckPath ${LIBS} ${OpenCV_LIBS})

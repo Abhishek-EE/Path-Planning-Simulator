@@ -152,7 +152,6 @@ void GenerateGridImplementation::addObstacles() {
         }
 
     }
-    std::cout<<"something to check";
 }
 
 Trajectory GenerateGridImplementation::getValidTrajectory() const{
