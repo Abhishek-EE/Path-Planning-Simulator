@@ -40,6 +40,19 @@ To install Eigen, run the following command:
 
     sudo apt install libeigen3-dev
 
+### OpenCV
+
+OpenCV is an open-source computer vision and machine learning software library. Documentation for OpenCV can be found
+[here](https://docs.opencv.org/master/). Tutorials and guides for various OpenCV functions are available
+[here](https://docs.opencv.org/master/d9/df8/tutorial_root.html).
+
+To install OpenCV on Ubuntu, you can use the following command:
+
+    sudo apt install libopencv-dev
+
+For other operating systems or advanced installation options, refer to the official OpenCV installation guides
+[here](https://opencv.org/releases/).
+
 ## Build
 
 To build , run
@@ -50,5 +63,47 @@ Feel free to edit the [main.cpp](src/main.cpp) to run the Path planner with any 
 grid.
 
 ## Assumptions
+1. The robot could rotate 360 degrees in place, given the robot is a Roomba seemed like a good enough assumption.
 
-List any assumptions you make in this section.
+
+## Approach
+This problem has mainly three subproblems that need addressing
+1. Path Planning in a grid
+2. How to deal with the mismatch in grid resolution and robot diameter
+3. Smoothning the generated path
+
+### Path Planning in a Grid
+For this part, I decided to assume that the current Occupancy Grid is a 2D graph,
+and any Single Source Shortest Path algorithm will technically work. I decided to go 
+with A*, as A* combines features of Dijkstra's Algorithm (which is efficient but can 
+be slow because it explores all directions equally) and the Greedy Best-First-Search 
+(which is fast but can be inaccurate). 
+
+### Tackling Grid Resolution and robot Diameter
+There were two approaches available to me for solving this problem,
+The first one was inflating the obstacles in the grid; after
+iterating through the entire grid and inflating the obstacles by marking the cells which
+are a diameter radius away from them as occupied. This approach although promising will be 
+very compute expensive as it will scale directly with grid size, sometimes we only have partial 
+information and we only know some parts of the grid.
+The second approach that I finally decided to go with is projecting a robot size square in front of the robot
+and then rotating that square to 360 degrees to calculate 8 neighbors and make sure they are traversable,
+if even a single point in the project square is not traversable it is considered as not traversable.
+This approach has a constant time addition cost and does not add an O(N*M) overhead to A*.
+
+### Smoothing the Path
+I am using a simple line smoother technique to make sure that the robot  can traverse the path without needing
+to take any unreasonable sharp turns.
+
+### Grid Generator
+In addition to this work, I also added a grid generator to test my code, which I think will be useful in your case too.
+There is also generateOccupancyGridFromImage Function -> Please add the path to the image there and it will generate the grid as per request.
+
+### Visualization
+I added the visualization to help me debug and test my code, you can find the implementation in the utility.h
+You will need Open CV for that as dependencies
+
+
+
+
+
