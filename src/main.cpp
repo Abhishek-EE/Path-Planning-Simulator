@@ -13,10 +13,10 @@ int main() {
   // std::unique_ptr<PathPlannerInterface> planner;
   Eigen::Vector3f start(3.0f, 4.0f, 0.0f); // Example start position
   Eigen::Vector3f end(13.0f, 12.0f, 0.0f); // Example end position
-  const float robotDia = 0.05;
+  const float robotDia = 0.6;
   bool isValid= true;
-  float occupancyratio = 0.5;
-  bool useImageGrid = true;
+  float occupancyratio = 0.2;
+  bool useImageGrid = false;
 #ifdef INTERFACE_NOT_IMPLEMENTED
   std::cout << "Hello World!\n";
 #else

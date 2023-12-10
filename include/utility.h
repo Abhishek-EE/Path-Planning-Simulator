@@ -56,7 +56,7 @@ void visualizeGrid(const OccupancyGrid& grid, const Eigen::Vector3f& start, cons
                pointRadius, cv::Scalar(255, 0, 0), -1); // Blue for end
 
     //Save the image
-    cv::imwrite("occupancy_grid.png", image);
+    cv::imwrite("occupancy_grid_random.png", image);
     // Display the image
     cv::imshow("Occupancy Grid", image);
     cv::waitKey(0); // Wait for a key press
@@ -122,7 +122,7 @@ void visualizeGridAndTrajectory(const OccupancyGrid& grid, const Trajectory& tra
     }
 
     // Save the image
-    cv::imwrite("trajectory_grid.png", image);
+    cv::imwrite("trajectory_grid_random.png", image);
     // Display the image
     cv::imshow("Trajectory", image);
     cv::waitKey(0); // Wait for a key press
