@@ -54,8 +54,9 @@ Trajectory PathPlannerImplementation::getCollisionFreePath(const OccupancyGrid &
     while (!openQueue.empty()) {
         
         ++iter;
-        if (iter > 100000) {
+        if (iter > 1000000) {
             std::cerr << "Warning: Maximum Iterations Reached, the goal seems unreachable" << std::endl;
+            break;
         }
         
         //Get the current node and add it to the closedSet (that is it is already visited)

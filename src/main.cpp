@@ -11,12 +11,12 @@
 int main() {
 
   // std::unique_ptr<PathPlannerInterface> planner;
-  Eigen::Vector3f start(2.0f, 9.0f, 0.0f); // Example start position
-  Eigen::Vector3f end(13.0f, 4.0f, 0.0f); // Example end position
-  const float robotDia = 0.6;
+  Eigen::Vector3f start(3.0f, 4.0f, 0.0f); // Example start position
+  Eigen::Vector3f end(13.0f, 12.0f, 0.0f); // Example end position
+  const float robotDia = 0.05;
   bool isValid= true;
-  float occupancyratio = 0.2;
-  bool useImageGrid = false;
+  float occupancyratio = 0.5;
+  bool useImageGrid = true;
 #ifdef INTERFACE_NOT_IMPLEMENTED
   std::cout << "Hello World!\n";
 #else
@@ -25,7 +25,7 @@ int main() {
   OccupancyGrid grid;
   GenerateGridImplementation gridGenerator(robotDia,occupancyratio);
   if(useImageGrid){
-    generateOccupancyGridFromImage(grid,"/home/abhishek/dev/Planning_Assingment/grid-example.png");
+    generateOccupancyGridFromImage(grid,"grid-example.png");
 
   }
   else{
