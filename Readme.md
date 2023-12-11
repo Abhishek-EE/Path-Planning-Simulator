@@ -14,7 +14,7 @@ y-axis is downward. The grid is of size `320 x 320` with a resolution of `0.05 m
 ### Grid Generator
 There are two ways to generate the grid. You could use an image of a grid with generateOccupancyGridFromImage. For example 
 
-**Image Used for Grid Generator**
+**Image Used for Generating the Grid**
 
 <img src="grid-example.png" width="400" alt="Image used for grid generation"/>
 
@@ -61,7 +61,19 @@ I am using a simple line smoother technique to make sure that the robot  can tra
 to take any unreasonable sharp turns.
 
 ### Visualization
-Various utility functions can be used to visualize the grid and trajectory.
+Various utility functions can be used to visualize the grid and trajectory. The trajectory for the above two cases can be seen below
+
+**Trajectory for Image-based Grid Generation**
+
+<img src="trajectory_grid.png" width="400" alt="Image used for grid generation"/>
+
+
+**Trajectory for Randomly Generated Grid**
+
+<img src="trajectory_grid_random.png" width="400" alt="Image used for grid generation"/>
+
+
+
 
 
 ## Dependencies
