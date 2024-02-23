@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(interview-planning)
+project(PathPlanning-Simulator)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 find_package(OpenCV REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include/)
@@ -16,4 +17,4 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 
 add_executable(CheckPath src/main.cpp src/GenerateGrid.cpp src/PathPlannerImplementation.cpp)
-target_link_libraries(CheckPath ${LIBS} ${OpenCV_LIBS})
+target_link_libraries(CheckPath ${LIBS} ${OpenCV_LIBS} yaml-cpp)
