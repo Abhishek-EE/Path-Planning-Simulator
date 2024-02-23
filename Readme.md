@@ -101,6 +101,16 @@ To install OpenCV on Ubuntu, you can use the following command:
 For other operating systems or advanced installation options, refer to the official OpenCV installation guides
 [here](https://opencv.org/releases/).
 
+### yaml-cpp
+yaml-cpp is an open-source library to parse yaml files. Documentation for yaml-cpp can be found [here]([https://docs.opencv.org/master/](https://github.com/jbeder/yaml-cpp))
+
+To install OpenCV on Ubuntu, you can use the following command:
+
+    sudo apt install libyaml-cpp-dev
+
+For other operating systems or advanced installation options, refer to the official yaml installation guides
+[here]([https://opencv.org/releases/](https://launchpad.net/ubuntu/+source/yaml-cpp)).
+
 ## Build
 
 To build , run
@@ -108,4 +118,13 @@ To build , run
     make -j8 && bin/CheckPath
 
 Feel free to edit the [main.cpp](src/main.cpp) to run the Path planner with any start and stop locations in any random grid.
+
+## Run
+To run the code
+
+    cd <path-planning-simulator>
+    ./bin/CheckPath
+
+Feel free to edit the [simulation.yaml](config/simulation.yaml) to run the Path planner with any start and stop locations in any random grid or image based grid.
+
 
